@@ -43,9 +43,89 @@ User Query → Query Generator → Research Structure Generator → Manager Agen
 - Brave Search API key
 - Git
 
-## Installation
+## Quick Start Guide
+
+## Installation & Setup
 
 ### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/ai-research-agent.git
+cd ai-research-agent
+```
+
+### 2. Create Virtual Environment
+
+```bash
+python -m venv myenv
+source myenv/bin/activate  # On Windows: myenv\Scripts\activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Install Playwright Browsers
+
+```bash
+playwright install
+```
+
+### 5. Configure Environment Variables
+
+Create a `.env` file in the root directory:
+```bash
+# Clone repository
+git clone https://github.com/yourusername/ai-research-agent.git
+cd ai-research-agent
+
+# Create virtual environment
+python -m venv myenv
+source myenv/bin/activate  # Windows: myenv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install Playwright browsers
+playwright install
+```
+
+### Step 2: Configure API Keys
+Create `.env` file with your API keys:
+```env
+RESEARCH_QUESTIONS_GENERATOR=your_groq_api_key
+RESEARCH_STRUCTURE_GENERATOR=your_groq_api_key
+MANAGER_AGENT_RESEARCH=your_groq_api_key
+WORKER_AGENT_1=your_groq_api_key
+WORKER_AGENT_2=your_groq_api_key
+WORKER_AGENT_3=your_groq_api_key
+WORKER_AGENT_4=your_groq_api_key
+WORKER_AGENT_5=your_groq_api_key
+LITERATURE_REVIEW_AGENT=your_groq_api_key
+SUB_AGENT=your_groq_api_key
+SUMMARY_AGENT=your_groq_api_key
+BRAVE_SEARCH=your_brave_search_api_key
+```
+
+### Step 3: Choose Your Workflow
+
+**Option A: Use Jupyter Notebook Directly**
+```bash
+jupyter notebook research.ipynb
+# Run all cells or specific cells as needed
+```
+
+**Option B: Convert to Python Module and Run**
+```bash
+# Convert notebook to Python file
+jupyter nbconvert --to python research.ipynb
+
+# Create run_research.py (see Usage section)
+# Then run:
+python run_research.py
+```
 
 ```bash
 git clone https://github.com/yourusername/ai-research-agent.git
@@ -119,10 +199,18 @@ asyncio==3.4.3
 
 ### Basic Usage
 
+Create a new Python file (e.g., `run_research.py`) and import the necessary functions:
+
 ```python
 import asyncio
 from databases import ResearchDatabase
 from source.utils import ResearchHelpFunctions
+# Import the core functions from research.ipynb (converted to a module)
+from research import (
+    create_multiple_queries,
+    create_researh_structure,
+    manager_agent1
+)
 
 # Initialize database
 db = ResearchDatabase()
@@ -155,27 +243,81 @@ async def run_research():
     return final_report
 
 # Execute
-report = asyncio.run(run_research())
+if __name__ == "__main__":
+    report = asyncio.run(run_research())
+    print("Research completed successfully!")
+```
+
+### Converting Notebook to Module
+
+Before running, you need to convert `research.ipynb` to a Python module. You can either:
+
+**Option 1: Export as Python file**
+```bash
+jupyter nbconvert --to python research.ipynb
+```
+
+**Option 2: Create a standalone module**
+Extract the functions from `research.ipynb` into a file called `research.py`:
+```python
+# research.py
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_groq import ChatGroq
+import os
+import re
+import asyncio
+import time
+from typing import List
+from source.utils import ResearchHelpFunctions
+
+# Initialize assistant
+assistant = ResearchHelpFunctions()
+
+# Initialize LLMs
+llm_query = ChatGroq(temperature=0.7, api_key=os.getenv("RESEARCH_QUESTIONS_GENERATOR"), model="qwen-qwq-32b")
+llm_structure = ChatGroq(temperature=0.7, api_key=os.getenv("RESEARCH_STRUCTURE_GENERATOR"), model="qwen-qwq-32b")
+llm_worker1 = ChatGroq(temperature=0.7, api_key=os.getenv("WORKER_AGENT_1"), model="qwen-qwq-32b")
+# ... initialize other workers similarly
+
+def create_multiple_queries(query):
+    # Copy function implementation from notebook
+    pass
+
+def create_researh_structure(question: str, generated_queries: list):
+    # Copy function implementation from notebook
+    pass
+
+async def manager_agent1(organized_dict: dict):
+    # Copy function implementation from notebook
+    pass
+
+# ... copy other worker functions
 ```
 
 ### Running the Example
 
 ```bash
-python main.py
+python run_research.py
+```
+
+Or run directly with the notebook:
+```bash
+jupyter notebook research.ipynb
 ```
 
 ## Project Structure
 
 ```
 ai-research-agent/
-├── research.ipynb                     # Main execution script
-├── databases.py                 # Database management
+├── research.ipynb              # Main Jupyter notebook with all functions             
+├── run_research.py             # Execution script
+├── db.py                # Database management
 ├── source/
-│   ├── utils.py                # Helper functions and utilities            # Additional scripts
-├── downloads/                  # Generated PDF reports
-├── .env                        # Environment variables
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+│   ├── utils.py               # Helper functions and utilities
+├── downloads/                 # Generated PDF reports
+├── .env                       # Environment variables
+├── requirements.txt           # Python dependencies
+└── README.md                  # This file
 ```
 
 ## Key Components
@@ -216,7 +358,7 @@ Creates professionally formatted reports with:
 
 **Important**: The system respects API rate limits:
 - Groq API: 100,000 tokens per day per key (free tier)
-- Brave Search: 1 request per second
+- Brave Search: 1 request per second (free Tier)
 - Delays between requests: 3-5 seconds
 
 **Recommendation**: Use multiple Groq API keys to distribute load.
